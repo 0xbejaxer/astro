@@ -87,6 +87,7 @@ export function glob(globOptions: GlobOptions & { [secretLegacyFlag]?: boolean }
 	}
 
 	const isLegacy = !!globOptions[secretLegacyFlag];
+	const hasCustomGenerateId = !!globOptions?.generateId;
 	const generateId =
 		globOptions?.generateId ?? ((opts: GenerateIdOptions) => generateIdDefault(opts, isLegacy));
 
@@ -136,7 +137,7 @@ export function glob(globOptions: GlobOptions & { [secretLegacyFlag]?: boolean }
 					fileUrl,
 				});
 
-				const id = generateId({ entry, base, data });
+				let id = generateId({ entry, base, data });
 
 				if (oldId && oldId !== id) {
 					store.delete(oldId);
@@ -170,6 +171,23 @@ export function glob(globOptions: GlobOptions & { [secretLegacyFlag]?: boolean }
 					data,
 					filePath,
 				});
+
+				// If the schema transformed `data.slug` (e.g. via z.string().slugify()),
+				// update the id to reflect the transformed value. This only applies when
+				// using the default generateId, which derives id from `data.slug`.
+				if (
+					!hasCustomGenerateId &&
+					data.slug &&
+					typeof parsedData.slug === 'string' &&
+					parsedData.slug !== id
+				) {
+					const newId = parsedData.slug;
+					if (id !== newId) {
+						store.delete(id);
+						untouchedEntries.delete(newId);
+					}
+					id = newId;
+				}
 
 				if (existingEntry && existingEntry.filePath && existingEntry.filePath !== relativePath) {
 					// Check the old file still exists - if not, this is likely a rename and

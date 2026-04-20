@@ -1,5 +1,11 @@
 # astro
 
+## 6.1.9
+
+### Patch Changes
+
+- [#16022](https://github.com/withastro/astro/pull/16022) [`a002540`](https://github.com/withastro/astro/commit/a002540d60d4a840db9971e73c820a8015658ffe) Thanks [@mathieumaf](https://github.com/mathieumaf)! - Fixes an issue where i18n domains would return 404 when `trailingSlash` is set to `never`.
+
 ## 6.1.8
 
 ### Patch Changes
